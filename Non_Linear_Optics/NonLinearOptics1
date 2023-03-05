@@ -1,0 +1,38 @@
+import torch
+import matplotlib.pyplot as plt
+
+# Define the parameters of the ZKB equation
+c = 1
+alpha = -0.5
+beta = 1
+gamma = -0.1
+
+# Define the initial condition for the simulation
+x = torch.linspace(-10, 10, 1000)
+u = torch.exp(-x**2)
+
+# Define the time step and number of iterations
+dt = 0.01
+n_iter = 1000
+
+# Define the operator matrix for the ZKB equation
+A = torch.tensor([
+    [-alpha, 0, 0, 0],
+    [1, -gamma, 0, -beta],
+    [0, 2*c, -alpha, 0],
+    [0, 0, 1, -gamma]
+])
+
+# Define the solution tensor
+U = torch.zeros((n_iter, len(x)))
+
+# Perform the simulation
+for i in range(n_iter):
+    U[i,:] = u
+    u = u + dt * torch.matmul(A, torch.cat([u[1:], torch.zeros(1)]).unsqueeze(-1)).squeeze()
+
+# Plot the results
+plt.imshow(U.T, cmap='jet', aspect='auto', extent=[0, n_iter*dt, x[0], x[-1]])
+plt.xlabel('Time')
+plt.ylabel('Space')
+plt.show()
