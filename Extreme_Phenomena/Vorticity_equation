@@ -1,0 +1,56 @@
+import numpy as np
+
+# Define parameters
+dx = 1.0  # spatial resolution
+dt = 0.1  # time step
+nu = 0.1  # viscosity
+t_end = 10.0  # end time
+
+# Define initial conditions
+u = np.zeros((100, 100))  # velocity field
+omega = np.zeros((100, 100))  # vorticity field
+omega[50, 50] = 1.0  # set initial vorticity
+
+# Define finite-difference operators
+Dx = np.zeros((100, 100))
+Dx[1:-1, 1:-1] = (u[1:-1, 2:] - u[1:-1, :-2]) / (2 * dx)
+Dy = np.zeros((100, 100))
+Dy[1:-1, 1:-1] = (u[2:, 1:-1] - u[:-2, 1:-1]) / (2 * dx)
+Dxx = np.zeros((100, 100))
+Dxx[1:-1, 1:-1] = (u[1:-1, 2:] - 2 * u[1:-1, 1:-1] + u[1:-1, :-2]) / dx**2
+Dyy = np.zeros((100, 100))
+Dyy[1:-1, 1:-1] = (u[2:, 1:-1] - 2 * u[1:-1, 1:-1] + u[:-2, 1:-1]) / dx**2
+
+# Time loop
+t = 0.0
+while t < t_end:
+    # Compute stretching term
+    stretch = np.zeros((100, 100, 2))
+    stretch[:, :, 0] = u[:, :] * Dx[:, :]
+    stretch[:, :, 1] = u[:, :] * Dy[:, :]
+    stretch_curl = np.zeros((100, 100))
+    stretch_curl[1:-1, 1:-1] = (stretch[1:-1, 2:, 1] - stretch[1:-1, :-2, 1] - stretch[2:, 1:-1, 0] + stretch[:-2, 1:-1, 0]) / (2 * dx)
+    
+    # Compute diffusion term
+    omega_xx = Dxx * omega
+    omega_yy = Dyy * omega
+    diffusion = nu * (omega_xx + omega_yy)
+    
+    # Update vorticity field
+    omega_new = omega + dt * (-u * Dx - u * Dy + stretch_curl + diffusion)
+    
+    # Apply boundary conditions
+    omega_new[0, :] = 0.0
+    omega_new[-1, :] = 0.0
+    omega_new[:, 0] = 0.0
+    omega_new[:, -1] = 0.0
+    
+    # Update velocity field (if necessary)
+    u_new = u
+    
+    # Update time
+    t += dt
+    
+    # Update fields
+    omega = omega_new
+    u = u_new
