@@ -1,3 +1,10 @@
+# This code calculates the first n_zeros Bessel function zeros for the zeroth-order Bessel function (i.e. j_0), 
+# then iterates over these zeros to calculate the corresponding resonance frequency and time. 
+# The resonance frequency for each mode is printed to the console, along with the corresponding resonance time. 
+# The initial condition is set to a Gaussian function centered at the origin of the cylinder. 
+# Note that this code is just an example, and the specific boundary conditions and physics of the system may 
+# require different or more complex modeling techniques.
+
 import numpy as np
 from scipy.special import jn_zeros
 
